@@ -21,8 +21,10 @@ def send_instruction(instruction):
 # Robot running cycle
 def running(): 
     try:
-        # Robot cycle (image recognision, drivin etc.)
-        print("")
+        # Manual debugging
+        key = input()
+        keyChar = chr (key)
+        send_instruction(keyChar)
     except KeyboardInterrupt: # Pressing ctrl + c should stop the program
         # Robot emergency stop
         print("Emergency stop!")
