@@ -1,0 +1,130 @@
+
+# pip install pygame pyserial    ---- instaleaza asta inainte
+
+
+import argparse
+import os
+import sys
+import time
+
+os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
+
+import pygame
+import serial
+
+MOVES = {
+    pygame.K_w: "F",
+    pygame.K_s: "B",
+    pygame.K_a: "L",
+    pygame.K_d: "R",
+}
+
+NAMES = {
+    "F": "FORWARD",
+    "B": "BACKWARD",
+    "L": "LEFT",
+    "R": "RIGHT",
+    "E": "STOPPED",
+}
+
+SPEEDS = [("1", "SLOW"), ("2", "NORMAL"), ("3", "FAST")]
+
+STOP = "E"
+
+
+def parse_args():
+    p = argparse.ArgumentParser(description="Drive the rover with W A S D. Space changes speed, Esc quits.")
+    p.add_argument("--port", default="/dev/ttyACM0", help="Arduino serial port")
+    p.add_argument("--baud", type=int, default=9600, help="serial baud rate")
+    return p.parse_args()
+
+
+def open_serial(port, baud):
+    try:
+        link = serial.Serial(port, baud, timeout=0)
+    except serial.SerialException as e:
+        sys.exit(f"Could not open {port}: {e}")
+    time.sleep(2)
+    link.reset_input_buffer()
+    print(f"Connected to {port} at {baud} baud")
+    return link
+
+
+def send(link, *cmds):
+    link.write("".join(cmds).encode("ascii"))
+    link.flush()
+
+
+def draw(screen, font, small, current, speed):
+    screen.fill((25, 25, 30))
+    color = (200, 200, 200) if current == STOP else (0, 200, 0)
+    screen.blit(font.render(NAMES[current], True, color), (20, 20))
+    screen.blit(font.render(f"Speed: {SPEEDS[speed][1]}", True, (255, 200, 0)), (20, 65))
+    for i, line in enumerate(["Hold W A S D to drive", "Space: change speed", "Esc: quit"]):
+        screen.blit(small.render(line, True, (160, 160, 160)), (20, 120 + i * 26))
+    pygame.display.flip()
+
+
+def main():
+    args = parse_args()
+    link = open_serial(args.port, args.baud)
+
+    pygame.init()
+    screen = pygame.display.set_mode((420, 210))
+    pygame.display.set_caption("Rover control")
+    font = pygame.font.Font(None, 40)
+    small = pygame.font.Font(None, 26)
+    clock = pygame.time.Clock()
+
+    held = []
+    speed = 1
+    current = STOP
+
+    def update(force=False):
+        nonlocal current
+        wanted = MOVES[held[-1]] if held else STOP
+        if wanted == current and not force:
+            return
+        if wanted == STOP:
+            send(link, STOP)
+        else:
+            send(link, SPEEDS[speed][0], wanted)
+        current = wanted
+        print(f"{NAMES[current]} ({SPEEDS[speed][1]})")
+
+    send(link, STOP)
+    running = True
+    try:
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+                    elif event.key == pygame.K_SPACE:
+                        speed = (speed + 1) % len(SPEEDS)
+                        update(force=current != STOP)
+                    elif event.key in MOVES and event.key not in held:
+                        held.append(event.key)
+                        update()
+                elif event.type == pygame.KEYUP:
+                    if event.key in held:
+                        held.remove(event.key)
+                        update()
+                elif event.type == pygame.WINDOWFOCUSLOST:
+                    held.clear()
+                    update()
+            draw(screen, font, small, current, speed)
+            clock.tick(30)
+    finally:
+        try:
+            send(link, STOP)
+        except serial.SerialException:
+            pass
+        link.close()
+        pygame.quit()
+
+
+if __name__ == "__main__":
+    main()
