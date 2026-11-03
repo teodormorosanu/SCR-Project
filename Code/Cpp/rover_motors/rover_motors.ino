@@ -3,23 +3,23 @@
 
 // Comenteaza linia de mai jos daca nu vrei autotestul cu flash-uri la pornire
 #define DEBUG_MODE
-
+// sau cu pragma once
 #ifdef DEBUG_MODE
   #include "debug.h"
 #endif
 
 // Proceseaza fiecare comanda primita pe seriala de la Raspberry Pi
-void handleCommand(char cmd) {
+void handle_command(char cmd) {
   switch (cmd) {
     // Comenzi de miscare
-    case 'F': driveForward();  break;
-    case 'B': driveBackward(); break;
-    case 'L': turnLeft();      break;
-    case 'R': turnRight();     break;
+    case 'F': drive_forward();  break;
+    case 'B': drive_backward(); break;
+    case 'L': turn_left();      break;
+    case 'R': turn_right();     break;
 
     // Oprire de urgenta
     case 'E':
-      stopMotors();
+      stop_motors();
       break;
 
     // Trepte PWM de viteza
@@ -33,6 +33,8 @@ void handleCommand(char cmd) {
 
     #ifdef DEBUG_MODE
     case 'X': flash_beams(3, 150); break;
+    case 'P': set_beams(true); break;
+    case 'p': set_beams(false); break;
     #endif
 
     default:
@@ -52,7 +54,7 @@ void setup() {
 
 void loop() {
   if (Serial.available() > 0) {[cite: 1]
-    char incomingChar = Serial.read();[cite: 1]
-    handleCommand(incomingChar);
+    char incoming_char = Serial.read();[cite: 1]
+    handle_command(incoming_char);
   }
 }

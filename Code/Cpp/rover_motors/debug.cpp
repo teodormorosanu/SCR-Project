@@ -17,24 +17,24 @@ void run_hardware_diagnostics() {
   delay(500);
 
   // Test directii motoare
-  driveForward();
+  drive_forward();
   delay(300);
-  stopMotors();
+  stop_motors();
   delay(200);
 
-  driveBackward();
+  drive_backward();
   delay(300);
-  stopMotors();
+  stop_motors();
   delay(200);
 
-  turnLeft();
+  turn_left();
   delay(300);
-  stopMotors();
+  stop_motors();
   delay(200);
 
-  turnRight();
+  turn_right();
   delay(300);
-  stopMotors();
+  stop_motors();
   delay(200);
 
   // Confirmare finala
