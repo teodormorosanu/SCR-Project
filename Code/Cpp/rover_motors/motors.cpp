@@ -19,7 +19,7 @@ void set_motors(uint8_t motor_id, uint8_t pwm) {
   }
 }
 
-void applyDirections(uint8_t m1_dir, uint8_t m2_dir, uint8_t m3_dir, uint8_t m4_dir) {
+static void applyDirections(uint8_t m1_dir, uint8_t m2_dir, uint8_t m3_dir, uint8_t m4_dir) {
   motors[0]->run(m1_dir);
   motors[1]->run(m2_dir);
   motors[2]->run(m3_dir);

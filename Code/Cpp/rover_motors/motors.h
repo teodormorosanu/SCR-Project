@@ -9,7 +9,6 @@ const uint8_t SPEED_FAST   = 110;
 
 void setup_motors();
 void set_motors(uint8_t motor_id, uint8_t pwm);
-void applyDirections(uint8_t m1_dir, uint8_t m2_dir, uint8_t m3_dir, uint8_t m4_dir);
 
 void driveForward();
 void driveBackward();
