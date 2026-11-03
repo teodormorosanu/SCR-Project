@@ -21,7 +21,6 @@ picam2.configure(
 )
 picam2.start()
 time.sleep(1)
-
 # --- FUNCTIONS --- #
 
 # Returneaza conturul celui mai mare obiect sau None.
